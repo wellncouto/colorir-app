@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Card, Heading, Text, Label, Input, Pill, Divider } from "@/components/ui";
+import { Button, Card, Heading, Text, Label, Input, Pill, Divider, Toast } from "@/components/ui";
 
 const API = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -22,6 +22,8 @@ type Status = {
   pdf_preview_url: string | null;
   pdf_final_url: string | null;
   fotos: Foto[];
+  pix_chave: string;
+  whatsapp_url: string;
 };
 
 const fmtBRL = (centavos: number) => `R$ ${(centavos / 100).toFixed(2).replace(".", ",")}`;
@@ -34,6 +36,12 @@ export default function AlbumClient({ token }: { token: string }) {
   const [nome, setNome] = useState("");
   const [estilo, setEstilo] = useState<"familia" | "rosa" | "azul">("familia");
   const [enviando, setEnviando] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2200);
+  };
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -141,6 +149,16 @@ export default function AlbumClient({ token }: { token: string }) {
     }
   };
 
+  const copyPix = async () => {
+    if (!data?.pix_chave) return;
+    try {
+      await navigator.clipboard.writeText(data.pix_chave);
+      showToast("Chave PIX copiada ✓");
+    } catch {
+      showToast("Não consegui copiar — copia manual");
+    }
+  };
+
   if (!data && !err) {
     return (
       <main className="min-h-dvh flex items-center justify-center">
@@ -153,7 +171,7 @@ export default function AlbumClient({ token }: { token: string }) {
       <main className="min-h-dvh flex flex-col items-center justify-center gap-4 px-6">
         <Text muted>Não foi possível carregar.</Text>
         <Button
-          variant="ghost"
+          variant="secondary"
           onClick={() => {
             setErr(null);
             fetchStatus();
@@ -169,28 +187,25 @@ export default function AlbumClient({ token }: { token: string }) {
   // ===== Estado: PAGO =====
   if (data.status === "PAGO") {
     return (
-      <main className="min-h-dvh px-6 py-section flex items-center justify-center">
+      <main className="min-h-dvh px-6 py-20 flex items-center justify-center bg-polar">
         <div className="max-w-md w-full text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-pill bg-charcoal mb-8">
-            <span className="text-3xl text-off-white">✓</span>
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-pill bg-owl shadow-lip-owl mb-10 pop">
+            <span className="text-4xl">🎉</span>
           </div>
-          <Heading level={3} className="mb-3">
-            Prontinho! 🎉
+          <Heading level={2} className="mb-3">
+            Prontinho!
           </Heading>
           <Text muted className="mb-10">
             Seu livro tá pronto pra imprimir, em A4 alta qualidade.
           </Text>
-          <a href={`${API}/colorir/album/${token}/pdf-final`} className="block">
+          <a href={`${API}/colorir/album/${token}/pdf-final`} className="block mb-3">
             <Button variant="primary" size="lg" fullWidth>
-              Baixar PDF
+              📥 Baixar PDF
             </Button>
           </a>
-          <a
-            href="https://wa.me/5547991100824?text=Quero%20fazer%20outro%20livro%20pra%20colorir"
-            className="block mt-3"
-          >
-            <Button variant="ghost" size="lg" fullWidth>
-              Fazer outro livro
+          <a href="https://wa.me/5547991100824?text=Quero%20fazer%20outro%20livro" className="block">
+            <Button variant="secondary" size="lg" fullWidth>
+              Fazer outro
             </Button>
           </a>
         </div>
@@ -201,42 +216,89 @@ export default function AlbumClient({ token }: { token: string }) {
   // ===== Estado: PREVIEW =====
   if (data.status === "PREVIEW") {
     return (
-      <main className="min-h-dvh px-6 lg:px-12 py-12 lg:py-section max-w-6xl mx-auto">
-        <div className="text-center lg:text-left mb-10 lg:mb-16">
-          <Text size="caption" muted className="tracking-wide uppercase mb-2">
-            ✦ Preview pronto
-          </Text>
-          <Heading level={3} className="mb-2">
-            Tá lindo! ✨
-          </Heading>
-          <Text muted className="lg:max-w-xl">
-            Confere o preview do seu livrinho e libera a versão final sem marca d&apos;água.
-          </Text>
-        </div>
-        <div className="grid lg:grid-cols-[1fr_360px] gap-8 lg:gap-12 items-start">
-          <div className="rounded border border-border-soft overflow-hidden bg-cream">
-            <iframe
-              src={`${API}/colorir/album/${token}/preview`}
-              className="w-full aspect-[210/297] block"
-            />
-          </div>
-          <Card className="lg:sticky lg:top-8">
-            <Text size="caption" muted className="mb-1">
-              Versão sem marca d&apos;água
+      <main className="min-h-dvh bg-polar pb-32 lg:pb-12">
+        <div className="px-6 lg:px-12 py-12 lg:py-20 max-w-6xl mx-auto">
+          <div className="text-center lg:text-left mb-8 lg:mb-12">
+            <Text size="caption" muted className="uppercase tracking-wider mb-2">
+              ✨ Preview pronto
             </Text>
             <Heading level={2} className="mb-2">
-              {fmtBRL(data.valor_centavos)}
+              Tá lindo!
             </Heading>
-            <Text size="label" muted className="mb-5">
-              Manda o PIX pelo WhatsApp e em segundos seu PDF final é liberado aqui.
+            <Text muted className="lg:max-w-xl">
+              Confere como ficou seu livrinho e libera a versão final sem marca d&apos;água.
             </Text>
-            <a href="https://wa.me/5547991100824?text=Já%20fiz%20o%20pix%2C%20segue%20comprovante">
-              <Button variant="primary" size="lg" fullWidth>
-                Pagar via WhatsApp
+          </div>
+
+          <div className="grid lg:grid-cols-[1fr_360px] gap-8 lg:gap-12 items-start">
+            {/* Preview imagem (funciona em qualquer device) */}
+            <div className="rounded-lg border-2 border-swan overflow-hidden bg-snow">
+              <img
+                src={`${API}/colorir/album/${token}/preview-image`}
+                alt="Preview da capa"
+                className="w-full h-auto block"
+              />
+            </div>
+
+            {/* Card lateral / fixo no mobile */}
+            <Card className="lg:sticky lg:top-8">
+              <Text size="caption" muted className="uppercase tracking-wider mb-1 text-xs">
+                Pra liberar sem marca d&apos;água
+              </Text>
+              <div className="text-page-title-lg font-extrabold text-eel mb-4">
+                {fmtBRL(data.valor_centavos)}
+              </div>
+
+              {/* Chave PIX */}
+              <div className="bg-polar border-2 border-swan rounded p-3 mb-3">
+                <Text size="caption" muted className="uppercase tracking-wider text-xs mb-1">
+                  Chave PIX (copia e cola)
+                </Text>
+                <div className="font-mono text-sm text-eel break-all">{data.pix_chave}</div>
+              </div>
+
+              <Button variant="info" size="lg" fullWidth onClick={copyPix}>
+                📋 Copiar chave PIX
+              </Button>
+              <a href={data.whatsapp_url} target="_blank" rel="noopener" className="block mt-2">
+                <Button variant="primary" size="lg" fullWidth>
+                  💬 Enviar comprovante
+                </Button>
+              </a>
+
+              <Text size="caption" muted className="mt-4 text-xs text-center">
+                Após o pagamento, em segundos seu PDF fica liberado aqui mesmo.
+              </Text>
+
+              {data.pdf_preview_url && (
+                <a
+                  href={`${API}/colorir/album/${token}/preview`}
+                  target="_blank"
+                  rel="noopener"
+                  className="block text-center mt-4 text-macaw underline text-sm font-bold"
+                >
+                  Ver PDF completo →
+                </a>
+              )}
+            </Card>
+          </div>
+        </div>
+
+        {/* FAB sticky mobile (lg:hidden) */}
+        <div className="fixed bottom-0 left-0 right-0 bg-snow border-t-2 border-swan p-4 lg:hidden z-40">
+          <div className="max-w-md mx-auto flex gap-2">
+            <Button variant="info" size="md" onClick={copyPix} className="flex-1">
+              📋 Copiar PIX
+            </Button>
+            <a href={data.whatsapp_url} target="_blank" rel="noopener" className="flex-1">
+              <Button variant="primary" size="md" fullWidth>
+                💬 Comprovante
               </Button>
             </a>
-          </Card>
+          </div>
         </div>
+
+        <Toast visible={!!toast}>{toast}</Toast>
       </main>
     );
   }
@@ -247,25 +309,25 @@ export default function AlbumClient({ token }: { token: string }) {
     const erro = data.fotos.filter((f) => f.status === "ERRO").length;
     const pct = Math.round(((ok + erro) / Math.max(1, data.fotos.length)) * 100);
     return (
-      <main className="min-h-dvh px-6 py-section flex items-center justify-center">
+      <main className="min-h-dvh px-6 py-20 flex items-center justify-center bg-polar">
         <div className="max-w-md w-full text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-pill bg-charcoal mb-8">
-            <span className="text-xl text-off-white animate-pulse">✦</span>
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-pill bg-bee shadow-lip-bee mb-10 pop">
+            <span className="text-4xl animate-pulse">✦</span>
           </div>
-          <Heading level={3} className="mb-3">
-            Tô desenhando ✦
+          <Heading level={2} className="mb-3">
+            Tô desenhando
           </Heading>
           <Text muted className="mb-10">
-            Tô transformando suas fotos em desenhos pra colorir. Pode levar 1–2 minutinhos.
+            Tô transformando suas fotos em desenhos. Pode levar 1–2 minutinhos.
           </Text>
           <Card>
-            <div className="h-1 bg-charcoal-4 rounded-pill overflow-hidden mb-3">
+            <div className="h-3 bg-swan rounded-pill overflow-hidden mb-3">
               <div
-                className="h-full bg-charcoal transition-all duration-700"
+                className="h-full bg-owl transition-all duration-700 rounded-pill"
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <Text size="caption" muted>
+            <Text size="caption" bold muted>
               {ok}/{data.fotos.length} prontas {erro > 0 && `· ${erro} com erro`}
             </Text>
           </Card>
@@ -280,144 +342,137 @@ export default function AlbumClient({ token }: { token: string }) {
   const pronto = completos >= 1;
 
   return (
-    <main className="min-h-dvh px-6 lg:px-12 pt-12 lg:pt-section pb-32 lg:pb-section max-w-6xl mx-auto">
-      <header className="mb-10 lg:mb-16 lg:max-w-xl relative">
-        {/* decoração sutil kids */}
-        <div className="hidden lg:block absolute -top-4 -right-12 text-coral text-3xl select-none">✦</div>
-        <div className="hidden lg:block absolute top-16 -right-8 text-sage text-xl select-none">●</div>
-        <Text size="caption" muted className="tracking-wide uppercase mb-2">
-          🎨 Álbum personalizado
-        </Text>
-        <Heading level={3} className="mb-2 lg:!text-display">
-          Monte seu livro.
-        </Heading>
-        <Text size="label" muted>
-          {completos}/{data.qtd_fotos + 1} fotos enviadas
-        </Text>
-      </header>
+    <main className="min-h-dvh bg-polar">
+      <div className="px-6 lg:px-12 pt-12 lg:pt-20 pb-32 lg:pb-20 max-w-6xl mx-auto">
+        <header className="mb-10 lg:mb-16 lg:max-w-xl relative">
+          <div className="hidden lg:block absolute -top-4 -right-12 text-bee text-3xl select-none rotate-12">★</div>
+          <div className="hidden lg:block absolute top-16 -right-8 text-cardinal text-xl select-none">♥</div>
+          <Text size="caption" muted className="uppercase tracking-wider mb-2 text-xs">
+            🎨 Álbum personalizado
+          </Text>
+          <Heading level={2} className="mb-2">
+            Monte seu livro
+          </Heading>
+          <Text size="caption" muted className="font-bold">
+            {completos}/{data.qtd_fotos + 1} fotos enviadas
+          </Text>
+        </header>
 
-      <div className="grid lg:grid-cols-[1fr_360px] gap-8 lg:gap-12 items-start">
-        <div>
-          {/* Capa */}
-          <section className="mb-10 lg:mb-12">
-            <Label>Capa principal</Label>
-            <div className="max-w-xs lg:max-w-sm">
-              <PhotoSlot
-                posicao={0}
-                token={token}
-                isCapa
-                uploading={uploading[0]}
-                thumb={thumbs[0]}
-                uploaded={data.fotos.some((f) => f.posicao === 0)}
-                onPick={(file) => onUpload(0, file)}
-                onDelete={() => onDelete(0)}
+        <div className="grid lg:grid-cols-[1fr_360px] gap-8 lg:gap-12 items-start">
+          <div>
+            {/* Capa */}
+            <section className="mb-10 lg:mb-12">
+              <Label>Capa principal</Label>
+              <div className="max-w-xs lg:max-w-sm">
+                <PhotoSlot
+                  posicao={0}
+                  token={token}
+                  isCapa
+                  uploading={uploading[0]}
+                  thumb={thumbs[0]}
+                  uploaded={data.fotos.some((f) => f.posicao === 0)}
+                  onPick={(file) => onUpload(0, file)}
+                  onDelete={() => onDelete(0)}
+                />
+              </div>
+            </section>
+
+            <Divider className="mb-10 lg:mb-12" />
+
+            {/* Nome */}
+            <section className="mb-10 lg:mb-12">
+              <Label>Nome na capa</Label>
+              <Input
+                type="text"
+                value={nome}
+                onChange={(e) => setNome(e.target.value.slice(0, 30))}
+                placeholder="Ex: Família Couto, Livro do Gael..."
+                maxLength={30}
+                className="lg:max-w-md"
               />
-            </div>
-          </section>
+            </section>
 
-          <Divider className="mb-10 lg:mb-12" />
+            {/* Estilo */}
+            <section className="mb-10 lg:mb-12">
+              <Label>Estilo da capa</Label>
+              <div className="flex gap-2 flex-wrap">
+                {(["familia", "rosa", "azul"] as const).map((opt) => (
+                  <Pill key={opt} selected={estilo === opt} onClick={() => setEstilo(opt)}>
+                    {opt === "familia" ? "Família" : opt === "rosa" ? "Menina" : "Menino"}
+                  </Pill>
+                ))}
+              </div>
+            </section>
 
-          {/* Nome */}
-          <section className="mb-10 lg:mb-12">
-            <Label>Nome na capa</Label>
-            <Input
-              type="text"
-              value={nome}
-              onChange={(e) => setNome(e.target.value.slice(0, 30))}
-              placeholder="Ex: Família Couto, Livro do Gael..."
-              maxLength={30}
-              className="lg:max-w-md"
-            />
-          </section>
+            <Divider className="mb-10 lg:mb-12" />
 
-          {/* Estilo */}
-          <section className="mb-10 lg:mb-12">
-            <Label>Estilo da capa</Label>
-            <div className="flex gap-2 flex-wrap">
-              {([
-                { v: "familia", label: "Família", dot: "bg-coral" },
-                { v: "rosa", label: "Menina", dot: "bg-coral-soft border border-coral" },
-                { v: "azul", label: "Menino", dot: "bg-sky-soft border border-sky" },
-              ] as const).map(({ v, label, dot }) => (
-                <Pill key={v} selected={estilo === v} onClick={() => setEstilo(v)}>
-                  <span className={`inline-block w-2.5 h-2.5 rounded-pill ${dot} mr-2`} />
-                  {label}
-                </Pill>
-              ))}
-            </div>
-          </section>
+            {/* Páginas */}
+            <section>
+              <Label>Páginas do livro · {data.qtd_fotos} fotos</Label>
+              <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-3">
+                {slots.slice(1).map((p) => {
+                  const f = data.fotos.find((x) => x.posicao === p);
+                  return (
+                    <PhotoSlot
+                      key={p}
+                      posicao={p}
+                      token={token}
+                      uploading={uploading[p]}
+                      thumb={thumbs[p]}
+                      uploaded={!!f}
+                      onPick={(file) => onUpload(p, file)}
+                      onDelete={() => onDelete(p)}
+                      small
+                      label={String(p)}
+                    />
+                  );
+                })}
+              </div>
+            </section>
 
-          <Divider className="mb-10 lg:mb-12" />
+            {err && (
+              <Card className="mt-6 !bg-cardinal/10 !border-cardinal">
+                <Text size="caption" bold className="!text-cardinal">
+                  {err}
+                </Text>
+              </Card>
+            )}
+          </div>
 
-          {/* Páginas */}
-          <section>
-            <Label>Páginas do livro · {data.qtd_fotos} fotos</Label>
-            <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-3">
-              {slots.slice(1).map((p) => {
-                const f = data.fotos.find((x) => x.posicao === p);
-                return (
-                  <PhotoSlot
-                    key={p}
-                    posicao={p}
-                    token={token}
-                    uploading={uploading[p]}
-                    thumb={thumbs[p]}
-                    uploaded={!!f}
-                    onPick={(file) => onUpload(p, file)}
-                    onDelete={() => onDelete(p)}
-                    small
-                    label={String(p)}
-                  />
-                );
-              })}
-            </div>
-          </section>
-
-          {err && (
-            <Text size="caption" className="mt-6 text-red-700">
-              {err}
-            </Text>
-          )}
+          {/* Sidebar desktop com pricing + CTA */}
+          <aside className="hidden lg:block lg:sticky lg:top-12">
+            <Card>
+              <Text size="caption" muted className="uppercase tracking-wider text-xs mb-1">
+                Pacote escolhido
+              </Text>
+              <div className="text-page-title-lg font-extrabold text-eel mb-2">
+                {fmtBRL(data.valor_centavos)}
+              </div>
+              <Text size="caption" muted className="mb-5">
+                {data.qtd_fotos + 1} fotos · capa Pixar + páginas line art
+                <br />
+                PDF A4 300 DPI · pronto pra imprimir
+              </Text>
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                onClick={onProcessar}
+                disabled={!pronto || enviando}
+              >
+                {enviando ? "Enviando..." : pronto ? "Montar meu livro" : "Adicione a capa"}
+              </Button>
+              <Text size="caption" muted className="mt-3 text-center text-xs">
+                Pré-visualização em ~1 min
+              </Text>
+            </Card>
+          </aside>
         </div>
-
-        {/* Sidebar desktop com CTA — em mobile vira footer fixo */}
-        <aside className="hidden lg:block lg:sticky lg:top-12">
-          <Card>
-            <Text size="caption" muted className="mb-1">
-              Pacote escolhido
-            </Text>
-            <Heading level={2} className="mb-2">
-              {fmtBRL(data.valor_centavos)}
-            </Heading>
-            <Text size="label" muted className="mb-2">
-              {data.qtd_fotos + 1} fotos · capa Pixar + páginas line art
-            </Text>
-            <Text size="caption" muted className="mb-5">
-              PDF A4 300 DPI · pronto pra imprimir
-            </Text>
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              onClick={onProcessar}
-              disabled={!pronto || enviando}
-            >
-              {enviando
-                ? "enviando..."
-                : pronto
-                ? "Montar meu livro"
-                : "Adicione a capa"}
-            </Button>
-            <Text size="caption" muted className="mt-3 text-center">
-              Pré-visualização gerada em ~1 min
-            </Text>
-          </Card>
-        </aside>
       </div>
 
       {/* Footer fixo apenas no mobile */}
-      <div className="fixed bottom-0 left-0 right-0 bg-cream/95 backdrop-blur-sm border-t border-border-soft lg:hidden">
-        <div className="max-w-md mx-auto px-6 py-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-snow border-t-2 border-swan p-4 lg:hidden z-40">
+        <div className="max-w-md mx-auto">
           <Button
             variant="primary"
             size="lg"
@@ -426,10 +481,10 @@ export default function AlbumClient({ token }: { token: string }) {
             disabled={!pronto || enviando}
           >
             {enviando
-              ? "enviando..."
+              ? "Enviando..."
               : pronto
               ? `Montar livro · ${fmtBRL(data.valor_centavos)}`
-              : "Adicione a capa pra continuar"}
+              : "Adicione a capa"}
           </Button>
         </div>
       </div>
@@ -461,7 +516,6 @@ function PhotoSlot({
   label?: string;
 }) {
   const ref = useRef<HTMLInputElement>(null);
-  // Se já tá uploadado e sem thumb local, busca do servidor
   const serverThumb = uploaded && !thumb
     ? `${API}/colorir/album/${token}/foto/${posicao}`
     : null;
@@ -472,27 +526,27 @@ function PhotoSlot({
       <button
         onClick={() => ref.current?.click()}
         type="button"
-        title={uploaded ? "Toque pra trocar a foto" : "Adicionar foto"}
+        title={uploaded ? "Trocar foto" : "Adicionar foto"}
         className={[
-          "aspect-square relative w-full overflow-hidden rounded transition-all duration-150 active:opacity-80",
-          "border",
-          uploaded ? "border-charcoal" : "border-border-soft hover:border-border-strong",
-          showThumb ? "bg-charcoal-3" : "bg-cream",
+          "aspect-square relative w-full overflow-hidden rounded-lg transition-all duration-150",
+          "border-2 border-b-4",
+          uploaded ? "border-owl bg-snow" : "border-swan bg-snow hover:bg-polar",
+          "active:translate-y-[2px] active:border-b-2",
         ].join(" ")}
       >
         {showThumb && (
           <img src={showThumb} alt="" className="absolute inset-0 w-full h-full object-cover" />
         )}
         {!showThumb && !uploaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-charcoal-40">
-            <span className={small ? "text-base" : "text-2xl"}>+</span>
-            {isCapa && <span className="text-caption mt-2 text-muted">Adicionar capa</span>}
-            {!isCapa && !small && <span className="text-caption mt-1 text-muted">{label || posicao}</span>}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-hare">
+            <span className={small ? "text-2xl font-bold" : "text-4xl font-bold"}>+</span>
+            {isCapa && <span className="text-label-sm uppercase mt-2 text-wolf">Adicionar capa</span>}
+            {!isCapa && !small && <span className="text-label-sm uppercase mt-1">{label || posicao}</span>}
           </div>
         )}
         {uploading && (
-          <div className="absolute inset-0 bg-cream/80 flex items-center justify-center">
-            <div className="w-5 h-5 border-2 border-charcoal border-t-transparent rounded-pill animate-spin" />
+          <div className="absolute inset-0 bg-snow/80 flex items-center justify-center">
+            <div className="w-6 h-6 border-3 border-owl border-t-transparent rounded-pill animate-spin" />
           </div>
         )}
         <input
@@ -509,7 +563,6 @@ function PhotoSlot({
         />
       </button>
 
-      {/* Botão deletar — aparece quando tem foto */}
       {uploaded && onDelete && !uploading && (
         <button
           type="button"
@@ -517,7 +570,7 @@ function PhotoSlot({
             e.stopPropagation();
             onDelete();
           }}
-          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-pill bg-charcoal text-off-white flex items-center justify-center text-xs shadow-inset-dark active:opacity-80 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
+          className="absolute top-1.5 right-1.5 w-7 h-7 rounded-pill bg-cardinal text-snow flex items-center justify-center text-base font-bold shadow-lip-cardinal active:translate-y-[2px] active:[box-shadow:0_2px_0_#ea2b2b]"
           aria-label="Remover foto"
           title="Remover"
         >

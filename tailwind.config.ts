@@ -1,79 +1,93 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Design System inspired by Lovable
- * - Warm parchment background (cream)
- * - Opacity-driven color system (all grays from #1c1c1c)
- * - Border-based containment (no heavy shadows except inset on dark buttons)
- * - Inter as humanist fallback for Camera Plain Variable (proprietary)
+ * Design System inspired by Duolingo
+ * - Verde owl como primário (CTA), com lip 3D (sombra inferior sólida)
+ * - Cores nomeadas por animais (semantic)
+ * - Border radius generoso (12–16px)
+ * - Nunito como fallback free de Feather/Duolingo Sans (arredondada, chunky)
  */
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        // Primary palette
-        cream: "#f7f4ed",
-        "off-white": "#fcfbf8",
-        charcoal: {
-          DEFAULT: "#1c1c1c",
-          83: "rgba(28,28,28,0.83)",
-          82: "rgba(28,28,28,0.82)",
-          40: "rgba(28,28,28,0.4)",
-          4: "rgba(28,28,28,0.04)",
-          3: "rgba(28,28,28,0.03)",
-        },
-        muted: "#5f5f5d",
-        "border-soft": "#eceae4",
-        "border-strong": "rgba(28,28,28,0.4)",
-        // accent kids-friendly (soft coral/peach), usar com leveza
-        coral: {
-          DEFAULT: "#E8826A",
-          soft: "#FBE8E1",
-        },
-        sage: {
-          DEFAULT: "#8AA37B",
-          soft: "#E8EFE3",
-        },
-        sky: {
-          DEFAULT: "#7BA0BD",
-          soft: "#E1ECF4",
-        },
+        // Brand & primary (verde Duolingo)
+        owl: "#58cc02",
+        "tree-frog": "#58a700",
+        // Info / link (azul)
+        macaw: "#1cb0f6",
+        whale: "#1899d6",
+        // Erro / vermelho (vidas)
+        cardinal: "#ff4b4b",
+        "fire-ant": "#ea2b2b",
+        // Amarelo (XP/streak)
+        bee: "#ffc800",
+        // Laranja (flame)
+        fox: "#ff9600",
+        lion: "#ffb100",
+        // Roxo (Super)
+        beetle: "#ce82ff",
+        betta: "#9069cd",
+        // Neutros (texto + superfícies)
+        snow: "#ffffff",
+        polar: "#f7f7f7",
+        swan: "#e5e5e5",
+        hare: "#afafaf",
+        wolf: "#777777",
+        eel: "#4b4b4b",
+        // Cores extras pra ilustração
+        bluejay: "#84d8ff",
+        beluga: "#bbf2ff",
+        canary: "#fff5d3",
+        sea: "#9ee0e9",
+        peacock: "#00cd9c",
       },
       fontFamily: {
-        sans: ['"Inter"', "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ['"Inter Tight"', '"Inter"', "ui-sans-serif", "system-ui", "sans-serif"],
+        // Nunito = fallback livre de Feather/Duolingo Sans
+        sans: ['"Nunito"', "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ['"Nunito"', "ui-sans-serif", "system-ui", "sans-serif"],
       },
       fontSize: {
-        // editorial scale
-        "display-xl": ["3.75rem", { lineHeight: "1.05", letterSpacing: "-0.045em", fontWeight: "600" }],
-        "display": ["3rem", { lineHeight: "1.05", letterSpacing: "-0.04em", fontWeight: "600" }],
-        "display-sm": ["2.25rem", { lineHeight: "1.10", letterSpacing: "-0.025em", fontWeight: "600" }],
-        "title": ["1.25rem", { lineHeight: "1.25", fontWeight: "500" }],
-        "body-lg": ["1.125rem", { lineHeight: "1.40", fontWeight: "400" }],
-        "body": ["1rem", { lineHeight: "1.50", fontWeight: "400" }],
-        "label": ["0.875rem", { lineHeight: "1.40", fontWeight: "500" }],
-        "caption": ["0.75rem", { lineHeight: "1.40", fontWeight: "400" }],
+        // Tokens Duolingo
+        "page-title-lg": ["2.5rem", { lineHeight: "2.75rem", letterSpacing: "0", fontWeight: "800" }],
+        "page-title": ["2rem", { lineHeight: "2.25rem", letterSpacing: "0", fontWeight: "800" }],
+        "heading-lg": ["1.75rem", { lineHeight: "2rem", fontWeight: "800" }],
+        "heading": ["1.5rem", { lineHeight: "2rem", fontWeight: "800" }],
+        "heading-sm": ["1.25rem", { lineHeight: "1.5rem", fontWeight: "800" }],
+        "heading-xs": ["1rem", { lineHeight: "1.25rem", fontWeight: "800" }],
+        "body": ["1.25rem", { lineHeight: "1.75rem", fontWeight: "600" }],
+        "body-bold": ["1.25rem", { lineHeight: "1.75rem", fontWeight: "800" }],
+        "caption": ["1rem", { lineHeight: "1.5rem", fontWeight: "600" }],
+        "caption-bold": ["1rem", { lineHeight: "1.5rem", fontWeight: "800" }],
+        "label-lg": ["1.5rem", { lineHeight: "1.5rem", fontWeight: "800", letterSpacing: "0.04em" }],
+        "label": ["1rem", { lineHeight: "1rem", fontWeight: "800", letterSpacing: "0.04em" }],
+        "label-sm": ["0.875rem", { lineHeight: "1rem", fontWeight: "800", letterSpacing: "0.04em" }],
       },
       borderRadius: {
-        micro: "4px",
         sm: "6px",
-        md: "8px",
         DEFAULT: "12px",
+        md: "12px",
         lg: "16px",
         pill: "9999px",
       },
       boxShadow: {
-        // Inset signature
-        "inset-dark":
-          "rgba(255,255,255,0.2) 0px 0.5px 0px 0px inset, rgba(0,0,0,0.2) 0px 0px 0px 0.5px inset, rgba(0,0,0,0.05) 0px 1px 2px 0px",
-        "focus-warm": "rgba(0,0,0,0.1) 0px 4px 12px",
+        // Lip 3D — sombra sólida inferior
+        "lip-owl": "0 4px 0 #58a700",
+        "lip-macaw": "0 4px 0 #1899d6",
+        "lip-cardinal": "0 4px 0 #ea2b2b",
+        "lip-bee": "0 4px 0 #d99e00",
+        "lip-fox": "0 4px 0 #cc7700",
+        "lip-beetle": "0 4px 0 #9069cd",
+        "lip-swan": "0 4px 0 #d4d4d4",
+        "lip-eel": "0 4px 0 #2e2e2e",
+        "lip-active": "0 2px 0 #58a700",
+        // Inset border (input selecionado)
+        "inset-swan": "inset 0 0 0 2px #e5e5e5",
+        "inset-macaw": "inset 0 0 0 2px #1cb0f6",
       },
-      spacing: {
-        // editorial section spacing
-        "section": "5rem",     // 80px
-        "section-lg": "8rem",   // 128px
-        "section-xl": "11rem",  // 176px
+      transitionTimingFunction: {
+        bounce: "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
       },
     },
   },

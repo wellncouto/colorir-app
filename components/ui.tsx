@@ -1,10 +1,13 @@
 /**
- * Componentes base do design system (Lovable-inspired).
- * Tudo client-safe. Usar em qualquer page/component.
+ * Componentes base do design system Duolingo-inspired.
+ * - Botões com lip 3D (sombra inferior sólida)
+ * - Active state "afunda" (translateY + lip menor)
+ * - Bordas grossas de input
+ * - Uppercase + letter-spacing nos labels/buttons
  */
 import { ButtonHTMLAttributes, HTMLAttributes, forwardRef, ReactNode, InputHTMLAttributes } from "react";
 
-type ButtonVariant = "primary" | "ghost" | "cream" | "pill";
+type ButtonVariant = "primary" | "info" | "danger" | "ghost" | "secondary";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -19,17 +22,22 @@ const cls = (...x: (string | false | undefined)[]) => x.filter(Boolean).join(" "
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = "primary", size = "md", fullWidth, className, children, leftIcon, rightIcon, ...rest }, ref) => {
     const base =
-      "inline-flex items-center justify-center gap-2 font-medium transition-opacity duration-150 active:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:shadow-focus-warm";
+      "inline-flex items-center justify-center gap-2 uppercase tracking-[0.04em] font-extrabold transition-all duration-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed disabled:!shadow-lip-swan disabled:!bg-swan disabled:!text-hare disabled:active:!translate-y-0";
     const sizeMap = {
-      sm: "text-label px-3 py-1.5 rounded-sm",
-      md: "text-body px-4 py-2 rounded-sm",
-      lg: "text-body px-6 py-3 rounded-sm",
+      sm: "text-label-sm px-4 py-2 rounded",
+      md: "text-label px-5 py-3 rounded",
+      lg: "text-label px-6 py-4 rounded",
     };
     const variantMap: Record<ButtonVariant, string> = {
-      primary: "bg-charcoal text-off-white shadow-inset-dark",
-      ghost: "bg-transparent text-charcoal border border-border-strong",
-      cream: "bg-cream text-charcoal border border-border-soft hover:border-border-strong",
-      pill: "bg-cream text-charcoal shadow-inset-dark rounded-pill px-4 py-2",
+      primary:
+        "bg-owl text-snow shadow-lip-owl hover:brightness-110 active:translate-y-[2px] active:shadow-lip-active",
+      info:
+        "bg-macaw text-snow shadow-lip-macaw hover:brightness-110 active:translate-y-[2px] active:[box-shadow:0_2px_0_#1899d6]",
+      danger:
+        "bg-cardinal text-snow shadow-lip-cardinal hover:brightness-110 active:translate-y-[2px] active:[box-shadow:0_2px_0_#ea2b2b]",
+      secondary:
+        "bg-snow text-eel border-2 border-swan border-b-4 hover:bg-polar active:translate-y-[2px] active:border-b-2",
+      ghost: "bg-transparent text-macaw hover:bg-bluejay/10 active:scale-95",
     };
     return (
       <button
@@ -55,7 +63,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       className={cls(
-        "bg-cream border border-border-soft rounded",
+        "bg-snow border-2 border-swan rounded-lg",
         padded && "p-5",
         className
       )}
@@ -72,19 +80,20 @@ export const Heading = ({
   children,
   className,
 }: {
-  level?: 1 | 2 | 3 | 4;
+  level?: 1 | 2 | 3 | 4 | 5;
   children: ReactNode;
   className?: string;
 }) => {
   const sizeMap = {
-    1: "text-display-xl",
-    2: "text-display",
-    3: "text-display-sm",
-    4: "text-title",
+    1: "text-page-title-lg",
+    2: "text-page-title",
+    3: "text-heading-lg",
+    4: "text-heading",
+    5: "text-heading-sm",
   };
-  const Tag = `h${level}` as keyof React.JSX.IntrinsicElements;
+  const Tag = `h${Math.min(level, 4)}` as keyof React.JSX.IntrinsicElements;
   return (
-    <Tag className={cls("font-display text-charcoal", sizeMap[level], className)}>
+    <Tag className={cls("font-display text-eel", sizeMap[level], className)}>
       {children}
     </Tag>
   );
@@ -92,30 +101,30 @@ export const Heading = ({
 
 export const Text = ({
   size = "body",
+  bold,
   children,
   className,
   muted,
 }: {
-  size?: "body-lg" | "body" | "label" | "caption";
+  size?: "body" | "caption";
+  bold?: boolean;
   children: ReactNode;
   className?: string;
   muted?: boolean;
 }) => {
   const sizeMap = {
-    "body-lg": "text-body-lg",
-    body: "text-body",
-    label: "text-label",
-    caption: "text-caption",
+    body: bold ? "text-body-bold" : "text-body",
+    caption: bold ? "text-caption-bold" : "text-caption",
   };
   return (
-    <p className={cls(sizeMap[size], muted ? "text-muted" : "text-charcoal-82", className)}>
+    <p className={cls(sizeMap[size], muted ? "text-wolf" : "text-eel", className)}>
       {children}
     </p>
   );
 };
 
 export const Label = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <label className={cls("text-label text-charcoal block mb-2 tracking-wide", className)}>
+  <label className={cls("text-label-sm text-wolf block mb-3 uppercase", className)}>
     {children}
   </label>
 );
@@ -127,10 +136,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     <input
       ref={ref}
       className={cls(
-        "w-full bg-cream border border-border-soft rounded-sm px-4 py-3 text-body text-charcoal",
-        "placeholder:text-muted",
-        "focus:outline-none focus:border-border-strong focus:shadow-focus-warm",
-        "transition-shadow duration-150",
+        "w-full bg-snow border-2 border-swan rounded px-4 py-3 text-eel font-bold text-base",
+        "placeholder:text-hare placeholder:font-semibold",
+        "focus:outline-none focus:border-macaw",
+        "transition-colors duration-150",
         className
       )}
       {...rest}
@@ -140,7 +149,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = "Input";
 
 export const Divider = ({ className }: { className?: string }) => (
-  <div className={cls("h-px bg-border-soft w-full", className)} />
+  <div className={cls("h-0.5 bg-swan rounded-pill w-full", className)} />
 );
 
 export const Pill = ({
@@ -158,13 +167,26 @@ export const Pill = ({
     onClick={onClick}
     type="button"
     className={cls(
-      "rounded-pill px-4 py-2 text-label transition-all duration-150 active:opacity-80",
+      "rounded px-4 py-2 text-label-sm uppercase font-extrabold transition-all duration-100",
+      "border-2 border-b-4",
       selected
-        ? "bg-charcoal text-off-white shadow-inset-dark"
-        : "bg-cream border border-border-soft text-charcoal hover:border-border-strong",
+        ? "bg-macaw text-snow border-whale active:translate-y-[2px] active:border-b-2"
+        : "bg-snow text-wolf border-swan hover:bg-polar active:translate-y-[2px] active:border-b-2",
       className
     )}
   >
     {children}
   </button>
 );
+
+/** Toast simples (pop-up no canto) */
+export const Toast = ({ children, visible }: { children: ReactNode; visible: boolean }) => {
+  if (!visible) return null;
+  return (
+    <div className="fixed bottom-24 lg:bottom-8 left-1/2 -translate-x-1/2 z-50 toast">
+      <div className="bg-eel text-snow px-5 py-3 rounded-pill shadow-lg font-bold text-sm">
+        {children}
+      </div>
+    </div>
+  );
+};
