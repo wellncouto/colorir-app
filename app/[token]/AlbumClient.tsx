@@ -28,6 +28,9 @@ type Status = {
 
 const fmtBRL = (centavos: number) => `R$ ${(centavos / 100).toFixed(2).replace(".", ",")}`;
 
+type Step = "capa" | "nome" | "estilo" | "paginas" | "revisao";
+const STEPS: Step[] = ["capa", "nome", "estilo", "paginas", "revisao"];
+
 export default function AlbumClient({ token }: { token: string }) {
   const [data, setData] = useState<Status | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -37,6 +40,7 @@ export default function AlbumClient({ token }: { token: string }) {
   const [estilo, setEstilo] = useState<"familia" | "rosa" | "azul">("familia");
   const [enviando, setEnviando] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [step, setStep] = useState<Step>("capa");
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -77,12 +81,13 @@ export default function AlbumClient({ token }: { token: string }) {
         const o = JSON.parse(saved);
         if (o.nome) setNome(o.nome);
         if (o.estilo) setEstilo(o.estilo);
+        if (o.step && STEPS.includes(o.step)) setStep(o.step);
       } catch {}
     }
   }, [token]);
   useEffect(() => {
-    localStorage.setItem(`colorir:${token}`, JSON.stringify({ nome, estilo }));
-  }, [token, nome, estilo]);
+    localStorage.setItem(`colorir:${token}`, JSON.stringify({ nome, estilo, step }));
+  }, [token, nome, estilo, step]);
 
   const onUpload = async (posicao: number, file: File) => {
     setUploading((s) => ({ ...s, [posicao]: true }));
@@ -192,21 +197,15 @@ export default function AlbumClient({ token }: { token: string }) {
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-pill bg-owl shadow-lip-owl mb-10 pop">
             <span className="text-4xl">🎉</span>
           </div>
-          <Heading level={2} className="mb-3">
-            Prontinho!
-          </Heading>
+          <Heading level={2} className="mb-3">Prontinho!</Heading>
           <Text muted className="mb-10">
             Seu livro tá pronto pra imprimir, em A4 alta qualidade.
           </Text>
           <a href={`${API}/colorir/album/${token}/pdf-final`} className="block mb-3">
-            <Button variant="primary" size="lg" fullWidth>
-              📥 Baixar PDF
-            </Button>
+            <Button variant="primary" size="lg" fullWidth>📥 Baixar PDF</Button>
           </a>
           <a href="https://wa.me/5547991100824?text=Quero%20fazer%20outro%20livro" className="block">
-            <Button variant="secondary" size="lg" fullWidth>
-              Fazer outro
-            </Button>
+            <Button variant="secondary" size="lg" fullWidth>Fazer outro</Button>
           </a>
         </div>
       </main>
@@ -219,85 +218,53 @@ export default function AlbumClient({ token }: { token: string }) {
       <main className="min-h-dvh bg-polar pb-32 lg:pb-12">
         <div className="px-6 lg:px-12 py-12 lg:py-20 max-w-6xl mx-auto">
           <div className="text-center lg:text-left mb-8 lg:mb-12">
-            <Text size="caption" muted className="uppercase tracking-wider mb-2">
-              ✨ Preview pronto
-            </Text>
-            <Heading level={2} className="mb-2">
-              Tá lindo!
-            </Heading>
+            <Text size="caption" muted className="uppercase tracking-wider mb-2">✨ Preview pronto</Text>
+            <Heading level={2} className="mb-2">Tá lindo!</Heading>
             <Text muted className="lg:max-w-xl">
               Confere como ficou seu livrinho e libera a versão final sem marca d&apos;água.
             </Text>
           </div>
-
           <div className="grid lg:grid-cols-[1fr_360px] gap-8 lg:gap-12 items-start">
-            {/* Preview imagem (funciona em qualquer device) */}
             <div className="rounded-lg border-2 border-swan overflow-hidden bg-snow">
-              <img
-                src={`${API}/colorir/album/${token}/preview-image`}
-                alt="Preview da capa"
-                className="w-full h-auto block"
-              />
+              <img src={`${API}/colorir/album/${token}/preview-image`} alt="" className="w-full h-auto block" />
             </div>
-
-            {/* Card lateral / fixo no mobile */}
             <Card className="lg:sticky lg:top-8">
               <Text size="caption" muted className="uppercase tracking-wider mb-1 text-xs">
                 Pra liberar sem marca d&apos;água
               </Text>
-              <div className="text-page-title-lg font-extrabold text-eel mb-4">
-                {fmtBRL(data.valor_centavos)}
-              </div>
-
-              {/* Chave PIX */}
+              <div className="text-page-title-lg font-extrabold text-eel mb-4">{fmtBRL(data.valor_centavos)}</div>
               <div className="bg-polar border-2 border-swan rounded p-3 mb-3">
                 <Text size="caption" muted className="uppercase tracking-wider text-xs mb-1">
                   Chave PIX (copia e cola)
                 </Text>
                 <div className="font-mono text-sm text-eel break-all">{data.pix_chave}</div>
               </div>
-
               <Button variant="info" size="lg" fullWidth onClick={copyPix}>
                 📋 Copiar chave PIX
               </Button>
               <a href={data.whatsapp_url} target="_blank" rel="noopener" className="block mt-2">
-                <Button variant="primary" size="lg" fullWidth>
-                  💬 Enviar comprovante
-                </Button>
+                <Button variant="primary" size="lg" fullWidth>💬 Enviar comprovante</Button>
               </a>
-
               <Text size="caption" muted className="mt-4 text-xs text-center">
                 Após o pagamento, em segundos seu PDF fica liberado aqui mesmo.
               </Text>
-
               {data.pdf_preview_url && (
-                <a
-                  href={`${API}/colorir/album/${token}/preview`}
-                  target="_blank"
-                  rel="noopener"
-                  className="block text-center mt-4 text-macaw underline text-sm font-bold"
-                >
+                <a href={`${API}/colorir/album/${token}/preview`} target="_blank" rel="noopener"
+                  className="block text-center mt-4 text-macaw underline text-sm font-bold">
                   Ver PDF completo →
                 </a>
               )}
             </Card>
           </div>
         </div>
-
-        {/* FAB sticky mobile (lg:hidden) */}
         <div className="fixed bottom-0 left-0 right-0 bg-snow border-t-2 border-swan p-4 lg:hidden z-40">
           <div className="max-w-md mx-auto flex gap-2">
-            <Button variant="info" size="md" onClick={copyPix} className="flex-1">
-              📋 Copiar PIX
-            </Button>
+            <Button variant="info" size="md" onClick={copyPix} className="flex-1">📋 Copiar PIX</Button>
             <a href={data.whatsapp_url} target="_blank" rel="noopener" className="flex-1">
-              <Button variant="primary" size="md" fullWidth>
-                💬 Comprovante
-              </Button>
+              <Button variant="primary" size="md" fullWidth>💬 Comprovante</Button>
             </a>
           </div>
         </div>
-
         <Toast visible={!!toast}>{toast}</Toast>
       </main>
     );
@@ -314,18 +281,13 @@ export default function AlbumClient({ token }: { token: string }) {
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-pill bg-bee shadow-lip-bee mb-10 pop">
             <span className="text-4xl animate-pulse">✦</span>
           </div>
-          <Heading level={2} className="mb-3">
-            Tô desenhando
-          </Heading>
+          <Heading level={2} className="mb-3">Tô desenhando</Heading>
           <Text muted className="mb-10">
             Tô transformando suas fotos em desenhos. Pode levar 1–2 minutinhos.
           </Text>
           <Card>
             <div className="h-3 bg-swan rounded-pill overflow-hidden mb-3">
-              <div
-                className="h-full bg-owl transition-all duration-700 rounded-pill"
-                style={{ width: `${pct}%` }}
-              />
+              <div className="h-full bg-owl transition-all duration-700 rounded-pill" style={{ width: `${pct}%` }} />
             </div>
             <Text size="caption" bold muted>
               {ok}/{data.fotos.length} prontas {erro > 0 && `· ${erro} com erro`}
@@ -336,80 +298,155 @@ export default function AlbumClient({ token }: { token: string }) {
     );
   }
 
-  // ===== Estado: NOVO / AGUARDA_ENVIO =====
+  // ===== NOVO / AGUARDA_ENVIO =====
+  // Mobile: WIZARD step-by-step
+  // Desktop: layout 2-col atual
+
+  const stepIndex = STEPS.indexOf(step);
+  const capaUploaded = data.fotos.some((f) => f.posicao === 0);
+  const paginasUploaded = data.fotos.filter((f) => !f.eh_capa).length;
+  const podeAvancar: Record<Step, boolean> = {
+    capa: capaUploaded,
+    nome: nome.trim().length >= 2,
+    estilo: !!estilo,
+    paginas: true, // pode pular páginas (mínimo 1 = capa)
+    revisao: capaUploaded,
+  };
+  const stepLabels: Record<Step, string> = {
+    capa: "Capa",
+    nome: "Nome",
+    estilo: "Estilo",
+    paginas: "Páginas",
+    revisao: "Revisão",
+  };
+
+  const next = () => {
+    const i = STEPS.indexOf(step);
+    if (i < STEPS.length - 1) setStep(STEPS[i + 1]);
+  };
+  const prev = () => {
+    const i = STEPS.indexOf(step);
+    if (i > 0) setStep(STEPS[i - 1]);
+  };
+
   const slots = Array.from({ length: data.qtd_fotos + 1 }, (_, i) => i);
-  const completos = data.fotos.length;
-  const pronto = completos >= 1;
 
   return (
-    <main className="min-h-dvh bg-polar">
-      <div className="px-6 lg:px-12 pt-12 lg:pt-20 pb-32 lg:pb-20 max-w-6xl mx-auto">
-        <header className="mb-10 lg:mb-16 lg:max-w-xl relative">
-          <div className="hidden lg:block absolute -top-4 -right-12 text-bee text-3xl select-none rotate-12">★</div>
-          <div className="hidden lg:block absolute top-16 -right-8 text-cardinal text-xl select-none">♥</div>
-          <Text size="caption" muted className="uppercase tracking-wider mb-2 text-xs">
-            🎨 Álbum personalizado
-          </Text>
-          <Heading level={2} className="mb-2">
-            Monte seu livro
-          </Heading>
-          <Text size="caption" muted className="font-bold">
-            {completos}/{data.qtd_fotos + 1} fotos enviadas
-          </Text>
-        </header>
+    <>
+      {/* ====== MOBILE WIZARD ====== */}
+      <main className="lg:hidden min-h-dvh bg-polar flex flex-col">
+        {/* Top bar com Voltar + progress */}
+        <div className="sticky top-0 z-30 bg-snow border-b-2 border-swan px-4 py-3 flex items-center gap-3">
+          <button
+            onClick={prev}
+            disabled={stepIndex === 0}
+            className="w-10 h-10 rounded-pill flex items-center justify-center text-eel disabled:opacity-30 active:bg-polar"
+            aria-label="Voltar"
+          >
+            <span className="text-xl">←</span>
+          </button>
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1.5">
+              <Text size="caption" bold className="text-xs uppercase tracking-wider">
+                {stepLabels[step]}
+              </Text>
+              <Text size="caption" muted className="text-xs font-bold">
+                {stepIndex + 1}/{STEPS.length}
+              </Text>
+            </div>
+            <div className="h-2 bg-swan rounded-pill overflow-hidden">
+              <div
+                className="h-full bg-owl rounded-pill transition-all duration-300"
+                style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
 
-        <div className="grid lg:grid-cols-[1fr_360px] gap-8 lg:gap-12 items-start">
-          <div>
-            {/* Capa */}
-            <section className="mb-10 lg:mb-12">
-              <Label>Capa principal</Label>
-              <div className="max-w-xs lg:max-w-sm">
+        <div className="flex-1 px-6 py-8">
+          {step === "capa" && (
+            <div>
+              <Heading level={3} className="mb-2">Foto principal</Heading>
+              <Text muted className="mb-8 text-base">
+                Essa foto vira a capa do livrinho, em estilo Pixar 3D colorido.
+              </Text>
+              <div className="max-w-xs mx-auto">
                 <PhotoSlot
                   posicao={0}
                   token={token}
                   isCapa
                   uploading={uploading[0]}
                   thumb={thumbs[0]}
-                  uploaded={data.fotos.some((f) => f.posicao === 0)}
+                  uploaded={capaUploaded}
                   onPick={(file) => onUpload(0, file)}
                   onDelete={() => onDelete(0)}
                 />
               </div>
-            </section>
+            </div>
+          )}
 
-            <Divider className="mb-10 lg:mb-12" />
-
-            {/* Nome */}
-            <section className="mb-10 lg:mb-12">
-              <Label>Nome na capa</Label>
+          {step === "nome" && (
+            <div>
+              <Heading level={3} className="mb-2">Nome na capa</Heading>
+              <Text muted className="mb-8 text-base">
+                Aparece grande embaixo da foto. Mínimo 2 letras.
+              </Text>
               <Input
                 type="text"
                 value={nome}
                 onChange={(e) => setNome(e.target.value.slice(0, 30))}
                 placeholder="Ex: Família Couto, Livro do Gael..."
                 maxLength={30}
-                className="lg:max-w-md"
+                autoFocus
               />
-            </section>
+              <Text size="caption" muted className="mt-2 text-xs">{nome.length}/30</Text>
+            </div>
+          )}
 
-            {/* Estilo */}
-            <section className="mb-10 lg:mb-12">
-              <Label>Estilo da capa</Label>
-              <div className="flex gap-2 flex-wrap">
-                {(["familia", "rosa", "azul"] as const).map((opt) => (
-                  <Pill key={opt} selected={estilo === opt} onClick={() => setEstilo(opt)}>
-                    {opt === "familia" ? "Família" : opt === "rosa" ? "Menina" : "Menino"}
-                  </Pill>
+          {step === "estilo" && (
+            <div>
+              <Heading level={3} className="mb-2">Estilo da capa</Heading>
+              <Text muted className="mb-8 text-base">
+                Escolha a paleta de cores da capa.
+              </Text>
+              <div className="space-y-3">
+                {([
+                  { v: "familia", title: "Família", desc: "Tons quentes e dourados", emoji: "👨‍👩‍👧" },
+                  { v: "rosa", title: "Menina", desc: "Rosa e tons pastel", emoji: "🌸" },
+                  { v: "azul", title: "Menino", desc: "Azul e tons frescos", emoji: "🌊" },
+                ] as const).map(({ v, title, desc, emoji }) => (
+                  <button
+                    key={v}
+                    onClick={() => setEstilo(v)}
+                    type="button"
+                    className={[
+                      "w-full text-left flex items-center gap-4 p-4 rounded-lg transition-all",
+                      "border-2 border-b-4 active:translate-y-[2px] active:border-b-2",
+                      estilo === v ? "bg-bluejay/10 border-macaw" : "bg-snow border-swan",
+                    ].join(" ")}
+                  >
+                    <span className="text-3xl">{emoji}</span>
+                    <div className="flex-1">
+                      <div className="font-extrabold text-eel uppercase text-sm">{title}</div>
+                      <div className="text-wolf text-sm font-bold">{desc}</div>
+                    </div>
+                    {estilo === v && (
+                      <span className="w-7 h-7 rounded-pill bg-macaw text-snow flex items-center justify-center font-extrabold">✓</span>
+                    )}
+                  </button>
                 ))}
               </div>
-            </section>
+            </div>
+          )}
 
-            <Divider className="mb-10 lg:mb-12" />
-
-            {/* Páginas */}
-            <section>
-              <Label>Páginas do livro · {data.qtd_fotos} fotos</Label>
-              <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-3">
+          {step === "paginas" && (
+            <div>
+              <Heading level={3} className="mb-2">Páginas do livro</Heading>
+              <Text muted className="mb-8 text-base">
+                Adicione até {data.qtd_fotos} fotos · {paginasUploaded}/{data.qtd_fotos} enviadas.
+                Pode pular se quiser só a capa.
+              </Text>
+              <div className="grid grid-cols-3 gap-2">
                 {slots.slice(1).map((p) => {
                   const f = data.fotos.find((x) => x.posicao === p);
                   return (
@@ -428,67 +465,232 @@ export default function AlbumClient({ token }: { token: string }) {
                   );
                 })}
               </div>
-            </section>
+            </div>
+          )}
 
-            {err && (
-              <Card className="mt-6 !bg-cardinal/10 !border-cardinal">
-                <Text size="caption" bold className="!text-cardinal">
-                  {err}
+          {step === "revisao" && (
+            <div>
+              <Heading level={3} className="mb-2">Revisão</Heading>
+              <Text muted className="mb-8 text-base">
+                Confere tudo antes de mandar processar.
+              </Text>
+              <div className="space-y-4">
+                <ReviewCard label="Capa" onEdit={() => setStep("capa")}>
+                  {capaUploaded ? (
+                    <div className="w-16 h-16 rounded overflow-hidden border-2 border-swan">
+                      <img src={`${API}/colorir/album/${token}/foto/0`} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <Text size="caption" className="!text-cardinal">Falta a capa</Text>
+                  )}
+                </ReviewCard>
+                <ReviewCard label="Nome" onEdit={() => setStep("nome")}>
+                  <Text bold>{nome || <span className="text-hare">— sem nome —</span>}</Text>
+                </ReviewCard>
+                <ReviewCard label="Estilo" onEdit={() => setStep("estilo")}>
+                  <Text bold className="capitalize">{estilo}</Text>
+                </ReviewCard>
+                <ReviewCard label="Páginas" onEdit={() => setStep("paginas")}>
+                  <Text bold>{paginasUploaded}/{data.qtd_fotos}</Text>
+                </ReviewCard>
+                <Card className="!bg-bee/10 !border-bee">
+                  <Text size="caption" muted className="uppercase tracking-wider text-xs mb-1">
+                    Total
+                  </Text>
+                  <div className="text-page-title-lg font-extrabold text-eel">
+                    {fmtBRL(data.valor_centavos)}
+                  </div>
+                  <Text size="caption" muted className="mt-1 text-xs">
+                    PDF A4 300 DPI · pré-visualização em ~1 min
+                  </Text>
+                </Card>
+              </div>
+              {err && (
+                <Card className="mt-4 !bg-cardinal/10 !border-cardinal">
+                  <Text size="caption" bold className="!text-cardinal">{err}</Text>
+                </Card>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Botão fixo inferior */}
+        <div className="sticky bottom-0 bg-snow border-t-2 border-swan p-4 z-40">
+          {step !== "revisao" ? (
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
+              onClick={next}
+              disabled={!podeAvancar[step]}
+            >
+              Próximo
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
+              onClick={onProcessar}
+              disabled={!capaUploaded || enviando}
+            >
+              {enviando ? "Enviando..." : `Montar livro · ${fmtBRL(data.valor_centavos)}`}
+            </Button>
+          )}
+        </div>
+      </main>
+
+      {/* ====== DESKTOP — layout all-in-one ====== */}
+      <main className="hidden lg:block min-h-dvh bg-polar">
+        <div className="px-12 pt-20 pb-20 max-w-6xl mx-auto">
+          <header className="mb-16 max-w-xl relative">
+            <div className="absolute -top-4 -right-12 text-bee text-3xl select-none rotate-12">★</div>
+            <div className="absolute top-16 -right-8 text-cardinal text-xl select-none">♥</div>
+            <Text size="caption" muted className="uppercase tracking-wider mb-2 text-xs">
+              🎨 Álbum personalizado
+            </Text>
+            <Heading level={2} className="mb-2">Monte seu livro</Heading>
+            <Text size="caption" muted className="font-bold">
+              {data.fotos.length}/{data.qtd_fotos + 1} fotos enviadas
+            </Text>
+          </header>
+
+          <div className="grid grid-cols-[1fr_360px] gap-12 items-start">
+            <div>
+              <section className="mb-12">
+                <Label>Capa principal</Label>
+                <div className="max-w-sm">
+                  <PhotoSlot
+                    posicao={0}
+                    token={token}
+                    isCapa
+                    uploading={uploading[0]}
+                    thumb={thumbs[0]}
+                    uploaded={capaUploaded}
+                    onPick={(file) => onUpload(0, file)}
+                    onDelete={() => onDelete(0)}
+                  />
+                </div>
+              </section>
+
+              <Divider className="mb-12" />
+
+              <section className="mb-12">
+                <Label>Nome na capa</Label>
+                <Input
+                  type="text"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value.slice(0, 30))}
+                  placeholder="Ex: Família Couto, Livro do Gael..."
+                  maxLength={30}
+                  className="max-w-md"
+                />
+              </section>
+
+              <section className="mb-12">
+                <Label>Estilo da capa</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {(["familia", "rosa", "azul"] as const).map((opt) => (
+                    <Pill key={opt} selected={estilo === opt} onClick={() => setEstilo(opt)}>
+                      {opt === "familia" ? "Família" : opt === "rosa" ? "Menina" : "Menino"}
+                    </Pill>
+                  ))}
+                </div>
+              </section>
+
+              <Divider className="mb-12" />
+
+              <section>
+                <Label>Páginas do livro · {data.qtd_fotos} fotos</Label>
+                <div className="grid grid-cols-4 gap-3">
+                  {slots.slice(1).map((p) => {
+                    const f = data.fotos.find((x) => x.posicao === p);
+                    return (
+                      <PhotoSlot
+                        key={p}
+                        posicao={p}
+                        token={token}
+                        uploading={uploading[p]}
+                        thumb={thumbs[p]}
+                        uploaded={!!f}
+                        onPick={(file) => onUpload(p, file)}
+                        onDelete={() => onDelete(p)}
+                        small
+                        label={String(p)}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+
+              {err && (
+                <Card className="mt-6 !bg-cardinal/10 !border-cardinal">
+                  <Text size="caption" bold className="!text-cardinal">{err}</Text>
+                </Card>
+              )}
+            </div>
+
+            <aside className="sticky top-12">
+              <Card>
+                <Text size="caption" muted className="uppercase tracking-wider text-xs mb-1">
+                  Pacote escolhido
+                </Text>
+                <div className="text-page-title-lg font-extrabold text-eel mb-2">
+                  {fmtBRL(data.valor_centavos)}
+                </div>
+                <Text size="caption" muted className="mb-5">
+                  {data.qtd_fotos + 1} fotos · capa Pixar + páginas line art
+                  <br />
+                  PDF A4 300 DPI · pronto pra imprimir
+                </Text>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  onClick={onProcessar}
+                  disabled={!capaUploaded || enviando}
+                >
+                  {enviando ? "Enviando..." : capaUploaded ? "Montar meu livro" : "Adicione a capa"}
+                </Button>
+                <Text size="caption" muted className="mt-3 text-center text-xs">
+                  Pré-visualização em ~1 min
                 </Text>
               </Card>
-            )}
+            </aside>
           </div>
-
-          {/* Sidebar desktop com pricing + CTA */}
-          <aside className="hidden lg:block lg:sticky lg:top-12">
-            <Card>
-              <Text size="caption" muted className="uppercase tracking-wider text-xs mb-1">
-                Pacote escolhido
-              </Text>
-              <div className="text-page-title-lg font-extrabold text-eel mb-2">
-                {fmtBRL(data.valor_centavos)}
-              </div>
-              <Text size="caption" muted className="mb-5">
-                {data.qtd_fotos + 1} fotos · capa Pixar + páginas line art
-                <br />
-                PDF A4 300 DPI · pronto pra imprimir
-              </Text>
-              <Button
-                variant="primary"
-                size="lg"
-                fullWidth
-                onClick={onProcessar}
-                disabled={!pronto || enviando}
-              >
-                {enviando ? "Enviando..." : pronto ? "Montar meu livro" : "Adicione a capa"}
-              </Button>
-              <Text size="caption" muted className="mt-3 text-center text-xs">
-                Pré-visualização em ~1 min
-              </Text>
-            </Card>
-          </aside>
         </div>
-      </div>
+      </main>
 
-      {/* Footer fixo apenas no mobile */}
-      <div className="fixed bottom-0 left-0 right-0 bg-snow border-t-2 border-swan p-4 lg:hidden z-40">
-        <div className="max-w-md mx-auto">
-          <Button
-            variant="primary"
-            size="lg"
-            fullWidth
-            onClick={onProcessar}
-            disabled={!pronto || enviando}
-          >
-            {enviando
-              ? "Enviando..."
-              : pronto
-              ? `Montar livro · ${fmtBRL(data.valor_centavos)}`
-              : "Adicione a capa"}
-          </Button>
-        </div>
+      <Toast visible={!!toast}>{toast}</Toast>
+    </>
+  );
+}
+
+function ReviewCard({
+  label,
+  onEdit,
+  children,
+}: {
+  label: string;
+  onEdit: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="bg-snow border-2 border-swan rounded p-4 flex items-center gap-4">
+      <div className="flex-1 min-w-0">
+        <Text size="caption" muted className="uppercase tracking-wider text-xs mb-1">
+          {label}
+        </Text>
+        <div>{children}</div>
       </div>
-    </main>
+      <button
+        type="button"
+        onClick={onEdit}
+        className="text-macaw font-extrabold text-sm uppercase tracking-wider px-3 py-1.5 rounded active:bg-bluejay/20"
+      >
+        Editar
+      </button>
+    </div>
   );
 }
 
@@ -534,9 +736,7 @@ function PhotoSlot({
           "active:translate-y-[2px] active:border-b-2",
         ].join(" ")}
       >
-        {showThumb && (
-          <img src={showThumb} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        )}
+        {showThumb && <img src={showThumb} alt="" className="absolute inset-0 w-full h-full object-cover" />}
         {!showThumb && !uploaded && (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-hare">
             <span className={small ? "text-2xl font-bold" : "text-4xl font-bold"}>+</span>
@@ -562,20 +762,14 @@ function PhotoSlot({
           }}
         />
       </button>
-
       {uploaded && onDelete && !uploading && (
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
           className="absolute top-1.5 right-1.5 w-7 h-7 rounded-pill bg-cardinal text-snow flex items-center justify-center text-base font-bold shadow-lip-cardinal active:translate-y-[2px] active:[box-shadow:0_2px_0_#ea2b2b]"
           aria-label="Remover foto"
           title="Remover"
-        >
-          ×
-        </button>
+        >×</button>
       )}
     </div>
   );
