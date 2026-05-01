@@ -495,13 +495,13 @@ export default function AlbumClient({ token }: { token: string }) {
                 </ReviewCard>
                 <Card className="!bg-bee/10 !border-bee">
                   <Text size="caption" muted className="uppercase tracking-wider text-xs mb-1">
-                    Total
+                    Próximo passo
                   </Text>
-                  <div className="text-page-title-lg font-extrabold text-eel">
-                    {fmtBRL(data.valor_centavos)}
-                  </div>
-                  <Text size="caption" muted className="mt-1 text-xs">
-                    PDF A4 300 DPI · pré-visualização em ~1 min
+                  <Text bold className="text-base">
+                    Vou montar seu livro e te mostrar uma prévia em ~1 min.
+                  </Text>
+                  <Text size="caption" muted className="mt-2 text-xs">
+                    PDF A4 300 DPI · pronto pra imprimir
                   </Text>
                 </Card>
               </div>
@@ -534,7 +534,7 @@ export default function AlbumClient({ token }: { token: string }) {
               onClick={onProcessar}
               disabled={!capaUploaded || enviando}
             >
-              {enviando ? "Enviando..." : `Montar livro · ${fmtBRL(data.valor_centavos)}`}
+              {enviando ? "Enviando..." : "Montar meu livro"}
             </Button>
           )}
         </div>
@@ -632,14 +632,14 @@ export default function AlbumClient({ token }: { token: string }) {
 
             <aside className="sticky top-12">
               <Card>
-                <Text size="caption" muted className="uppercase tracking-wider text-xs mb-1">
-                  Pacote escolhido
+                <Text size="caption" muted className="uppercase tracking-wider text-xs mb-3">
+                  Próximo passo
                 </Text>
-                <div className="text-page-title-lg font-extrabold text-eel mb-2">
-                  {fmtBRL(data.valor_centavos)}
-                </div>
+                <Text bold className="mb-3">
+                  Vou montar seu livro e te mostrar uma prévia em ~1 min.
+                </Text>
                 <Text size="caption" muted className="mb-5">
-                  {data.qtd_fotos + 1} fotos · capa Pixar + páginas line art
+                  Capa em estilo Pixar 3D + páginas line art
                   <br />
                   PDF A4 300 DPI · pronto pra imprimir
                 </Text>
@@ -652,9 +652,6 @@ export default function AlbumClient({ token }: { token: string }) {
                 >
                   {enviando ? "Enviando..." : capaUploaded ? "Montar meu livro" : "Adicione a capa"}
                 </Button>
-                <Text size="caption" muted className="mt-3 text-center text-xs">
-                  Pré-visualização em ~1 min
-                </Text>
               </Card>
             </aside>
           </div>
