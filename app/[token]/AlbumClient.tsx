@@ -333,37 +333,39 @@ export default function AlbumClient({ token }: { token: string }) {
 
   return (
     <>
-      {/* ====== MOBILE WIZARD ====== */}
-      <main className="lg:hidden min-h-dvh bg-polar flex flex-col">
+      {/* ====== WIZARD UNIFICADO (mobile + desktop centralizado) ====== */}
+      <main className="min-h-dvh bg-polar flex flex-col">
         {/* Top bar com Voltar + progress */}
-        <div className="sticky top-0 z-30 bg-snow border-b-2 border-swan px-4 py-3 flex items-center gap-3">
-          <button
-            onClick={prev}
-            disabled={stepIndex === 0}
-            className="w-10 h-10 rounded-pill flex items-center justify-center text-eel disabled:opacity-30 active:bg-polar"
-            aria-label="Voltar"
-          >
-            <span className="text-xl">←</span>
-          </button>
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1.5">
-              <Text size="caption" bold className="text-xs uppercase tracking-wider">
-                {stepLabels[step]}
-              </Text>
-              <Text size="caption" muted className="text-xs font-bold">
-                {stepIndex + 1}/{STEPS.length}
-              </Text>
-            </div>
-            <div className="h-2 bg-swan rounded-pill overflow-hidden">
-              <div
-                className="h-full bg-owl rounded-pill transition-all duration-300"
-                style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
-              />
+        <div className="sticky top-0 z-30 bg-snow border-b-2 border-swan px-4 py-3 lg:px-8 lg:py-4">
+          <div className="w-full max-w-2xl mx-auto flex items-center gap-3">
+            <button
+              onClick={prev}
+              disabled={stepIndex === 0}
+              className="w-10 h-10 rounded-pill flex items-center justify-center text-eel disabled:opacity-30 active:bg-polar"
+              aria-label="Voltar"
+            >
+              <span className="text-xl">←</span>
+            </button>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1.5">
+                <Text size="caption" bold className="text-xs uppercase tracking-wider">
+                  {stepLabels[step]}
+                </Text>
+                <Text size="caption" muted className="text-xs font-bold">
+                  {stepIndex + 1}/{STEPS.length}
+                </Text>
+              </div>
+              <div className="h-2 bg-swan rounded-pill overflow-hidden">
+                <div
+                  className="h-full bg-owl rounded-pill transition-all duration-300"
+                  style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 px-6 py-8">
+        <div className="flex-1 px-6 py-8 lg:py-16 max-w-2xl mx-auto w-full">
           {step === "capa" && (
             <div>
               <Heading level={3} className="mb-2">Foto principal</Heading>
@@ -446,7 +448,7 @@ export default function AlbumClient({ token }: { token: string }) {
                 Adicione até {data.qtd_fotos} fotos · {paginasUploaded}/{data.qtd_fotos} enviadas.
                 Pode pular se quiser só a capa.
               </Text>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 lg:gap-3">
                 {slots.slice(1).map((p) => {
                   const f = data.fotos.find((x) => x.posicao === p);
                   return (
@@ -515,145 +517,29 @@ export default function AlbumClient({ token }: { token: string }) {
         </div>
 
         {/* Botão fixo inferior */}
-        <div className="sticky bottom-0 bg-snow border-t-2 border-swan p-4 z-40">
-          {step !== "revisao" ? (
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              onClick={next}
-              disabled={!podeAvancar[step]}
-            >
-              Próximo
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              onClick={onProcessar}
-              disabled={!capaUploaded || enviando}
-            >
-              {enviando ? "Enviando..." : "Montar meu livro"}
-            </Button>
-          )}
-        </div>
-      </main>
-
-      {/* ====== DESKTOP — layout all-in-one ====== */}
-      <main className="hidden lg:block min-h-dvh bg-polar">
-        <div className="px-12 pt-20 pb-20 max-w-6xl mx-auto">
-          <header className="mb-16 max-w-xl relative">
-            <div className="absolute -top-4 -right-12 text-bee text-3xl select-none rotate-12">★</div>
-            <div className="absolute top-16 -right-8 text-cardinal text-xl select-none">♥</div>
-            <Text size="caption" muted className="uppercase tracking-wider mb-2 text-xs">
-              🎨 Álbum personalizado
-            </Text>
-            <Heading level={2} className="mb-2">Monte seu livro</Heading>
-            <Text size="caption" muted className="font-bold">
-              {data.fotos.length}/{data.qtd_fotos + 1} fotos enviadas
-            </Text>
-          </header>
-
-          <div className="grid grid-cols-[1fr_360px] gap-12 items-start">
-            <div>
-              <section className="mb-12">
-                <Label>Capa principal</Label>
-                <div className="max-w-sm">
-                  <PhotoSlot
-                    posicao={0}
-                    token={token}
-                    isCapa
-                    uploading={uploading[0]}
-                    thumb={thumbs[0]}
-                    uploaded={capaUploaded}
-                    onPick={(file) => onUpload(0, file)}
-                    onDelete={() => onDelete(0)}
-                  />
-                </div>
-              </section>
-
-              <Divider className="mb-12" />
-
-              <section className="mb-12">
-                <Label>Nome na capa</Label>
-                <Input
-                  type="text"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value.slice(0, 30))}
-                  placeholder="Ex: Família Couto, Livro do Gael..."
-                  maxLength={30}
-                  className="max-w-md"
-                />
-              </section>
-
-              <section className="mb-12">
-                <Label>Estilo da capa</Label>
-                <div className="flex gap-2 flex-wrap">
-                  {(["familia", "rosa", "azul"] as const).map((opt) => (
-                    <Pill key={opt} selected={estilo === opt} onClick={() => setEstilo(opt)}>
-                      {opt === "familia" ? "Dourado" : opt === "rosa" ? "Rosa" : "Azul"}
-                    </Pill>
-                  ))}
-                </div>
-              </section>
-
-              <Divider className="mb-12" />
-
-              <section>
-                <Label>Páginas do livro · {data.qtd_fotos} fotos</Label>
-                <div className="grid grid-cols-4 gap-3">
-                  {slots.slice(1).map((p) => {
-                    const f = data.fotos.find((x) => x.posicao === p);
-                    return (
-                      <PhotoSlot
-                        key={p}
-                        posicao={p}
-                        token={token}
-                        uploading={uploading[p]}
-                        thumb={thumbs[p]}
-                        uploaded={!!f}
-                        onPick={(file) => onUpload(p, file)}
-                        onDelete={() => onDelete(p)}
-                        small
-                        label={String(p)}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-
-              {err && (
-                <Card className="mt-6 !bg-cardinal/10 !border-cardinal">
-                  <Text size="caption" bold className="!text-cardinal">{err}</Text>
-                </Card>
-              )}
-            </div>
-
-            <aside className="sticky top-12">
-              <Card>
-                <Text size="caption" muted className="uppercase tracking-wider text-xs mb-3">
-                  Próximo passo
-                </Text>
-                <Text bold className="mb-3">
-                  Vou montar seu livro e te mostrar uma prévia em ~1 min.
-                </Text>
-                <Text size="caption" muted className="mb-5">
-                  Capa em estilo Pixar 3D + páginas line art
-                  <br />
-                  PDF A4 300 DPI · pronto pra imprimir
-                </Text>
-                <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  onClick={onProcessar}
-                  disabled={!capaUploaded || enviando}
-                >
-                  {enviando ? "Enviando..." : capaUploaded ? "Montar meu livro" : "Adicione a capa"}
-                </Button>
-              </Card>
-            </aside>
+        <div className="sticky bottom-0 bg-snow border-t-2 border-swan p-4 lg:py-5 z-40">
+          <div className="max-w-2xl mx-auto">
+            {step !== "revisao" ? (
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                onClick={next}
+                disabled={!podeAvancar[step]}
+              >
+                Próximo
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                onClick={onProcessar}
+                disabled={!capaUploaded || enviando}
+              >
+                {enviando ? "Enviando..." : "Montar meu livro"}
+              </Button>
+            )}
           </div>
         </div>
       </main>
