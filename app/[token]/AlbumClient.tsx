@@ -411,9 +411,9 @@ export default function AlbumClient({ token }: { token: string }) {
               </Text>
               <div className="space-y-3">
                 {([
-                  { v: "familia", title: "Família", desc: "Tons quentes e dourados", emoji: "👨‍👩‍👧" },
-                  { v: "rosa", title: "Menina", desc: "Rosa e tons pastel", emoji: "🌸" },
-                  { v: "azul", title: "Menino", desc: "Azul e tons frescos", emoji: "🌊" },
+                  { v: "familia", title: "Dourado", desc: "Tons quentes e amarelados", emoji: "✨" },
+                  { v: "rosa", title: "Rosa", desc: "Tons pastel suaves", emoji: "🌸" },
+                  { v: "azul", title: "Azul", desc: "Tons frescos e claros", emoji: "🌊" },
                 ] as const).map(({ v, title, desc, emoji }) => (
                   <button
                     key={v}
@@ -592,7 +592,7 @@ export default function AlbumClient({ token }: { token: string }) {
                 <div className="flex gap-2 flex-wrap">
                   {(["familia", "rosa", "azul"] as const).map((opt) => (
                     <Pill key={opt} selected={estilo === opt} onClick={() => setEstilo(opt)}>
-                      {opt === "familia" ? "Família" : opt === "rosa" ? "Menina" : "Menino"}
+                      {opt === "familia" ? "Dourado" : opt === "rosa" ? "Rosa" : "Azul"}
                     </Pill>
                   ))}
                 </div>
