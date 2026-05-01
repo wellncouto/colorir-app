@@ -3,14 +3,14 @@ import { Button, Heading, Text } from "@/components/ui";
 export default function Home() {
   return (
     <main className="min-h-dvh flex items-center justify-center px-6 py-section">
-      <div className="max-w-md w-full text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-pill bg-charcoal mb-8">
-          <span className="text-3xl">🎨</span>
+      <div className="max-w-3xl w-full text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-pill bg-charcoal mb-8 lg:mb-10">
+          <span className="text-3xl lg:text-4xl">🎨</span>
         </div>
-        <Heading level={2} className="mb-4">
+        <Heading level={2} className="mb-5 lg:!text-display-xl">
           Meu livro pra colorir.
         </Heading>
-        <Text size="body-lg" muted className="mb-10">
+        <Text size="body-lg" muted className="mb-10 lg:mb-12 max-w-xl mx-auto">
           Transforme as fotos da sua família em desenhos pra colorir, em A4 alta qualidade pronto pra imprimir.
         </Text>
         <a
@@ -21,7 +21,7 @@ export default function Home() {
             Falar no WhatsApp
           </Button>
         </a>
-        <Text size="caption" muted className="mt-8">
+        <Text size="caption" muted className="mt-10">
           Acesso exclusivo via link único enviado pelo WhatsApp.
         </Text>
       </div>
