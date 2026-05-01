@@ -1,18 +1,29 @@
+import { Button, Heading, Text } from "@/components/ui";
+
 export default function Home() {
   return (
-    <main className="min-h-dvh flex items-center justify-center p-6 text-center">
-      <div className="max-w-sm">
-        <div className="text-5xl mb-4">🎨</div>
-        <h1 className="text-2xl font-bold mb-2">Meu Livro Pra Colorir</h1>
-        <p className="text-gray-600 mb-6">
-          Acesso pelo WhatsApp. Procure o link único enviado pra você.
-        </p>
+    <main className="min-h-dvh flex items-center justify-center px-6 py-section">
+      <div className="max-w-md w-full text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-pill bg-charcoal mb-8">
+          <span className="text-3xl">🎨</span>
+        </div>
+        <Heading level={2} className="mb-4">
+          Meu livro pra colorir.
+        </Heading>
+        <Text size="body-lg" muted className="mb-10">
+          Transforme as fotos da sua família em desenhos pra colorir, em A4 alta qualidade pronto pra imprimir.
+        </Text>
         <a
           href="https://wa.me/5547991100824?text=Quero%20meu%20livro%20pra%20colorir"
-          className="inline-block bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-3 rounded-full"
+          className="inline-block"
         >
-          Falar no WhatsApp
+          <Button variant="primary" size="lg">
+            Falar no WhatsApp
+          </Button>
         </a>
+        <Text size="caption" muted className="mt-8">
+          Acesso exclusivo via link único enviado pelo WhatsApp.
+        </Text>
       </div>
     </main>
   );
