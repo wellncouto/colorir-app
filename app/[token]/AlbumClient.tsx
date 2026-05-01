@@ -99,6 +99,25 @@ export default function AlbumClient({ token }: { token: string }) {
     }
   };
 
+  const onDelete = async (posicao: number) => {
+    setErr(null);
+    setThumbs((t) => {
+      const n = { ...t };
+      delete n[posicao];
+      return n;
+    });
+    try {
+      const r = await fetch(`${API}/colorir/album/${token}/foto/${posicao}`, {
+        method: "DELETE",
+      });
+      if (!r.ok) throw new Error(`delete ${r.status}`);
+      await fetchStatus();
+    } catch (e: any) {
+      setErr(e.message);
+      await fetchStatus();
+    }
+  };
+
   const onProcessar = async () => {
     if (!data) return;
     if (data.fotos_uploaded < 1) {
@@ -285,11 +304,13 @@ export default function AlbumClient({ token }: { token: string }) {
             <div className="max-w-xs lg:max-w-sm">
               <PhotoSlot
                 posicao={0}
+                token={token}
                 isCapa
                 uploading={uploading[0]}
                 thumb={thumbs[0]}
-                uploaded={data.fotos.some((f) => f.posicao === 0 && f.status === "UPLOADED")}
+                uploaded={data.fotos.some((f) => f.posicao === 0)}
                 onPick={(file) => onUpload(0, file)}
+                onDelete={() => onDelete(0)}
               />
             </div>
           </section>
@@ -338,10 +359,12 @@ export default function AlbumClient({ token }: { token: string }) {
                   <PhotoSlot
                     key={p}
                     posicao={p}
+                    token={token}
                     uploading={uploading[p]}
                     thumb={thumbs[p]}
-                    uploaded={f?.status === "UPLOADED"}
+                    uploaded={!!f}
                     onPick={(file) => onUpload(p, file)}
+                    onDelete={() => onDelete(p)}
                     small
                     label={String(p)}
                   />
@@ -416,67 +439,91 @@ export default function AlbumClient({ token }: { token: string }) {
 
 function PhotoSlot({
   posicao,
+  token,
   isCapa,
   uploading,
   thumb,
   uploaded,
   onPick,
+  onDelete,
   small,
   label,
 }: {
   posicao: number;
+  token: string;
   isCapa?: boolean;
   uploading?: boolean;
   thumb?: string;
   uploaded?: boolean;
   onPick: (file: File) => void;
+  onDelete?: () => void;
   small?: boolean;
   label?: string;
 }) {
   const ref = useRef<HTMLInputElement>(null);
+  // Se já tá uploadado e sem thumb local, busca do servidor
+  const serverThumb = uploaded && !thumb
+    ? `${API}/colorir/album/${token}/foto/${posicao}`
+    : null;
+  const showThumb = thumb || serverThumb;
+
   return (
-    <button
-      onClick={() => ref.current?.click()}
-      type="button"
-      className={[
-        "aspect-square relative w-full overflow-hidden rounded transition-all duration-150 active:opacity-80",
-        "border",
-        uploaded ? "border-charcoal" : "border-border-soft hover:border-border-strong",
-        thumb ? "bg-charcoal-3" : "bg-cream",
-      ].join(" ")}
-    >
-      {thumb && (
-        <img src={thumb} alt="" className="absolute inset-0 w-full h-full object-cover" />
+    <div className="relative group">
+      <button
+        onClick={() => ref.current?.click()}
+        type="button"
+        title={uploaded ? "Toque pra trocar a foto" : "Adicionar foto"}
+        className={[
+          "aspect-square relative w-full overflow-hidden rounded transition-all duration-150 active:opacity-80",
+          "border",
+          uploaded ? "border-charcoal" : "border-border-soft hover:border-border-strong",
+          showThumb ? "bg-charcoal-3" : "bg-cream",
+        ].join(" ")}
+      >
+        {showThumb && (
+          <img src={showThumb} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        )}
+        {!showThumb && !uploaded && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-charcoal-40">
+            <span className={small ? "text-base" : "text-2xl"}>+</span>
+            {isCapa && <span className="text-caption mt-2 text-muted">Adicionar capa</span>}
+            {!isCapa && !small && <span className="text-caption mt-1 text-muted">{label || posicao}</span>}
+          </div>
+        )}
+        {uploading && (
+          <div className="absolute inset-0 bg-cream/80 flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-charcoal border-t-transparent rounded-pill animate-spin" />
+          </div>
+        )}
+        <input
+          ref={ref}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) onPick(f);
+            e.target.value = "";
+          }}
+        />
+      </button>
+
+      {/* Botão deletar — aparece quando tem foto */}
+      {uploaded && onDelete && !uploading && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-pill bg-charcoal text-off-white flex items-center justify-center text-xs shadow-inset-dark active:opacity-80 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
+          aria-label="Remover foto"
+          title="Remover"
+        >
+          ×
+        </button>
       )}
-      {!thumb && !uploaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-charcoal-40">
-          <span className={small ? "text-base" : "text-2xl"}>+</span>
-          {isCapa && <span className="text-caption mt-2 text-muted">Adicionar capa</span>}
-          {!isCapa && !small && <span className="text-caption mt-1 text-muted">{label || posicao}</span>}
-        </div>
-      )}
-      {uploading && (
-        <div className="absolute inset-0 bg-cream/80 flex items-center justify-center">
-          <div className="w-5 h-5 border-2 border-charcoal border-t-transparent rounded-pill animate-spin" />
-        </div>
-      )}
-      {uploaded && !thumb && (
-        <div className="absolute inset-0 bg-charcoal-4 flex items-center justify-center text-charcoal text-xl">
-          ✓
-        </div>
-      )}
-      <input
-        ref={ref}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onPick(f);
-          e.target.value = "";
-        }}
-      />
-    </button>
+    </div>
   );
 }
