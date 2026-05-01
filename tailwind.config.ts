@@ -26,6 +26,19 @@ const config: Config = {
         muted: "#5f5f5d",
         "border-soft": "#eceae4",
         "border-strong": "rgba(28,28,28,0.4)",
+        // accent kids-friendly (soft coral/peach), usar com leveza
+        coral: {
+          DEFAULT: "#E8826A",
+          soft: "#FBE8E1",
+        },
+        sage: {
+          DEFAULT: "#8AA37B",
+          soft: "#E8EFE3",
+        },
+        sky: {
+          DEFAULT: "#7BA0BD",
+          soft: "#E1ECF4",
+        },
       },
       fontFamily: {
         sans: ['"Inter"', "ui-sans-serif", "system-ui", "sans-serif"],

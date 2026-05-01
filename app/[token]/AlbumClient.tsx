@@ -156,10 +156,10 @@ export default function AlbumClient({ token }: { token: string }) {
             <span className="text-3xl text-off-white">✓</span>
           </div>
           <Heading level={3} className="mb-3">
-            Tudo pago.
+            Prontinho! 🎉
           </Heading>
           <Text muted className="mb-10">
-            Seu livro está pronto pra imprimir, em A4 300 DPI.
+            Seu livro tá pronto pra imprimir, em A4 alta qualidade.
           </Text>
           <a href={`${API}/colorir/album/${token}/pdf-final`} className="block">
             <Button variant="primary" size="lg" fullWidth>
@@ -185,13 +185,13 @@ export default function AlbumClient({ token }: { token: string }) {
       <main className="min-h-dvh px-6 lg:px-12 py-12 lg:py-section max-w-6xl mx-auto">
         <div className="text-center lg:text-left mb-10 lg:mb-16">
           <Text size="caption" muted className="tracking-wide uppercase mb-2">
-            Preview pronto
+            ✦ Preview pronto
           </Text>
           <Heading level={3} className="mb-2">
-            Tá quase.
+            Tá lindo! ✨
           </Heading>
           <Text muted className="lg:max-w-xl">
-            Confere o preview abaixo e libere a versão final sem marca d&apos;água.
+            Confere o preview do seu livrinho e libera a versão final sem marca d&apos;água.
           </Text>
         </div>
         <div className="grid lg:grid-cols-[1fr_360px] gap-8 lg:gap-12 items-start">
@@ -234,10 +234,10 @@ export default function AlbumClient({ token }: { token: string }) {
             <span className="text-xl text-off-white animate-pulse">✦</span>
           </div>
           <Heading level={3} className="mb-3">
-            Tô fazendo o seu livro.
+            Tô desenhando ✦
           </Heading>
           <Text muted className="mb-10">
-            A IA tá transformando suas fotos em desenhos. Pode levar 1–2 min.
+            Tô transformando suas fotos em desenhos pra colorir. Pode levar 1–2 minutinhos.
           </Text>
           <Card>
             <div className="h-1 bg-charcoal-4 rounded-pill overflow-hidden mb-3">
@@ -262,9 +262,12 @@ export default function AlbumClient({ token }: { token: string }) {
 
   return (
     <main className="min-h-dvh px-6 lg:px-12 pt-12 lg:pt-section pb-32 lg:pb-section max-w-6xl mx-auto">
-      <header className="mb-10 lg:mb-16 lg:max-w-xl">
+      <header className="mb-10 lg:mb-16 lg:max-w-xl relative">
+        {/* decoração sutil kids */}
+        <div className="hidden lg:block absolute -top-4 -right-12 text-coral text-3xl select-none">✦</div>
+        <div className="hidden lg:block absolute top-16 -right-8 text-sage text-xl select-none">●</div>
         <Text size="caption" muted className="tracking-wide uppercase mb-2">
-          Álbum personalizado
+          🎨 Álbum personalizado
         </Text>
         <Heading level={3} className="mb-2 lg:!text-display">
           Monte seu livro.
@@ -310,9 +313,14 @@ export default function AlbumClient({ token }: { token: string }) {
           <section className="mb-10 lg:mb-12">
             <Label>Estilo da capa</Label>
             <div className="flex gap-2 flex-wrap">
-              {(["familia", "rosa", "azul"] as const).map((opt) => (
-                <Pill key={opt} selected={estilo === opt} onClick={() => setEstilo(opt)}>
-                  {opt === "familia" ? "Família" : opt === "rosa" ? "Menina" : "Menino"}
+              {([
+                { v: "familia", label: "Família", dot: "bg-coral" },
+                { v: "rosa", label: "Menina", dot: "bg-coral-soft border border-coral" },
+                { v: "azul", label: "Menino", dot: "bg-sky-soft border border-sky" },
+              ] as const).map(({ v, label, dot }) => (
+                <Pill key={v} selected={estilo === v} onClick={() => setEstilo(v)}>
+                  <span className={`inline-block w-2.5 h-2.5 rounded-pill ${dot} mr-2`} />
+                  {label}
                 </Pill>
               ))}
             </div>
