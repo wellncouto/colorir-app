@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="border-t-2 border-swan bg-snow">
       <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row gap-4 items-center sm:justify-between text-center sm:text-left">
         <p className="text-wolf text-xs font-bold">
-          © {new Date().getFullYear()} · Feito com 💛
+          © {new Date().getFullYear()}
         </p>
         <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs font-bold uppercase tracking-wider">
           <Link href="/termos" className="text-wolf hover:text-eel transition-colors">
@@ -20,9 +20,9 @@ export function Footer() {
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener"
-            className="text-owl hover:brightness-110 transition-all flex items-center gap-1"
+            className="text-owl hover:brightness-110 transition-all"
           >
-            💬 WhatsApp
+            WhatsApp
           </a>
         </nav>
       </div>
