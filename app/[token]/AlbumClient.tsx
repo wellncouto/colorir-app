@@ -272,27 +272,16 @@ export default function AlbumClient({ token }: { token: string }) {
 
   // ===== Estado: PROCESSANDO =====
   if (data.status === "PROCESSANDO") {
-    const ok = data.fotos.filter((f) => f.status === "OK").length;
-    const erro = data.fotos.filter((f) => f.status === "ERRO").length;
-    const pct = Math.round(((ok + erro) / Math.max(1, data.fotos.length)) * 100);
     return (
       <main className="min-h-dvh px-6 py-20 flex items-center justify-center bg-polar">
         <div className="max-w-md w-full text-center">
-          <div className="inline-flex items-center justify-center w-24 h-24 rounded-pill bg-bee shadow-lip-bee mb-10 pop">
-            <span className="text-4xl animate-pulse">✦</span>
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-pill bg-tree-frog shadow-lip-tree-frog mb-10 pop">
+            <span className="text-4xl">✓</span>
           </div>
-          <Heading level={2} className="mb-3">Tô desenhando</Heading>
-          <Text muted className="mb-10">
-            Tô transformando suas fotos em desenhos. Pode levar 1–2 minutinhos.
+          <Heading level={2} className="mb-3">Pedido enviado!</Heading>
+          <Text muted>
+            Você vai receber o livro pronto direto no seu WhatsApp 🤝
           </Text>
-          <Card>
-            <div className="h-3 bg-swan rounded-pill overflow-hidden mb-3">
-              <div className="h-full bg-owl transition-all duration-700 rounded-pill" style={{ width: `${pct}%` }} />
-            </div>
-            <Text size="caption" bold muted>
-              {ok}/{data.fotos.length} prontas {erro > 0 && `· ${erro} com erro`}
-            </Text>
-          </Card>
         </div>
       </main>
     );
