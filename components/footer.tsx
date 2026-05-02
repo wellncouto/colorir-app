@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const WHATSAPP_URL = "https://wa.me/5547991100824";
+const WHATSAPP_URL = "https://wa.me/554735132596";
 
 export function Footer() {
   return (

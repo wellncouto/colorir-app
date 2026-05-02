@@ -204,7 +204,7 @@ export default function AlbumClient({ token }: { token: string }) {
           <a href={`${API}/colorir/album/${token}/pdf-final`} className="block mb-3">
             <Button variant="primary" size="lg" fullWidth>📥 Baixar PDF</Button>
           </a>
-          <a href="https://wa.me/5547991100824?text=Quero%20fazer%20outro%20livro" className="block">
+          <a href="https://wa.me/554735132596?text=Quero%20fazer%20outro%20livro" className="block">
             <Button variant="secondary" size="lg" fullWidth>Fazer outro</Button>
           </a>
         </div>

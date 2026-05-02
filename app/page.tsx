@@ -13,7 +13,7 @@ export default function Home() {
         <Text size="body" muted className="mb-10 max-w-xl mx-auto">
           Transforme as fotos da sua família em desenhos pra colorir, em A4 alta qualidade pronto pra imprimir.
         </Text>
-        <a href="https://wa.me/5547991100824?text=Quero%20meu%20livro%20pra%20colorir">
+        <a href="https://wa.me/554735132596?text=Quero%20meu%20livro%20pra%20colorir">
           <Button variant="primary" size="lg">
             Falar no WhatsApp
           </Button>
