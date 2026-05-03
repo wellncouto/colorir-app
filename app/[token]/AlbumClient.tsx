@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Card, Heading, Text, Label, Input, Pill, Divider, Toast } from "@/components/ui";
+import PreviewState from "./PreviewState";
 
 const API = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -214,74 +215,32 @@ export default function AlbumClient({ token }: { token: string }) {
 
   // ===== Estado: PREVIEW =====
   if (data.status === "PREVIEW") {
-    return (
-      <main className="min-h-dvh bg-polar pb-32 lg:pb-12">
-        <div className="px-6 lg:px-12 py-12 lg:py-20 max-w-6xl mx-auto">
-          <div className="text-center lg:text-left mb-8 lg:mb-12">
-            <Text size="caption" muted className="uppercase tracking-wider mb-2">✨ Preview pronto</Text>
-            <Heading level={2} className="mb-2">Tá lindo!</Heading>
-            <Text muted className="lg:max-w-xl">
-              Confere como ficou seu livrinho e libera a versão final sem marca d&apos;água.
-            </Text>
-          </div>
-          <div className="grid lg:grid-cols-[1fr_360px] gap-8 lg:gap-12 items-start">
-            <div className="rounded-lg border-2 border-swan overflow-hidden bg-snow">
-              <img src={`${API}/colorir/album/${token}/preview-image`} alt="" className="w-full h-auto block" />
-            </div>
-            <Card className="lg:sticky lg:top-8">
-              <Text size="caption" muted className="uppercase tracking-wider mb-1 text-xs">
-                Pra liberar sem marca d&apos;água
-              </Text>
-              <div className="text-page-title-lg font-extrabold text-eel mb-4">{fmtBRL(data.valor_centavos)}</div>
-              <div className="bg-polar border-2 border-swan rounded p-3 mb-3">
-                <Text size="caption" muted className="uppercase tracking-wider text-xs mb-1">
-                  Chave PIX (copia e cola)
-                </Text>
-                <div className="font-mono text-sm text-eel break-all">{data.pix_chave}</div>
-              </div>
-              <Button variant="info" size="lg" fullWidth onClick={copyPix}>
-                📋 Copiar chave PIX
-              </Button>
-              <a href={data.whatsapp_url} target="_blank" rel="noopener" className="block mt-2">
-                <Button variant="primary" size="lg" fullWidth>💬 Enviar comprovante</Button>
-              </a>
-              <Text size="caption" muted className="mt-4 text-xs text-center">
-                Após o pagamento, em segundos seu PDF fica liberado aqui mesmo.
-              </Text>
-              {data.pdf_preview_url && (
-                <a href={`${API}/colorir/album/${token}/preview`} target="_blank" rel="noopener"
-                  className="block text-center mt-4 text-macaw underline text-sm font-bold">
-                  Ver PDF completo →
-                </a>
-              )}
-            </Card>
-          </div>
-        </div>
-        <div className="fixed bottom-0 left-0 right-0 bg-snow border-t-2 border-swan p-4 lg:hidden z-40">
-          <div className="max-w-md mx-auto flex gap-2">
-            <Button variant="info" size="md" onClick={copyPix} className="flex-1">📋 Copiar PIX</Button>
-            <a href={data.whatsapp_url} target="_blank" rel="noopener" className="flex-1">
-              <Button variant="primary" size="md" fullWidth>💬 Comprovante</Button>
-            </a>
-          </div>
-        </div>
-        <Toast visible={!!toast}>{toast}</Toast>
-      </main>
-    );
+    return <PreviewState data={data} token={token} copyPix={copyPix} toast={toast || ""} />;
   }
 
   // ===== Estado: PROCESSANDO =====
   if (data.status === "PROCESSANDO") {
+    const ok = data.fotos.filter((f) => f.status === "OK").length;
+    const erro = data.fotos.filter((f) => f.status === "ERRO").length;
+    const pct = Math.round(((ok + erro) / Math.max(1, data.fotos.length)) * 100);
     return (
       <main className="min-h-dvh px-6 py-20 flex items-center justify-center bg-polar">
         <div className="max-w-md w-full text-center">
-          <div className="inline-flex items-center justify-center w-24 h-24 rounded-pill bg-tree-frog shadow-lip-tree-frog mb-10 pop">
-            <span className="text-4xl">✓</span>
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-pill bg-bee shadow-lip-bee mb-10 pop">
+            <span className="text-4xl animate-pulse">✦</span>
           </div>
-          <Heading level={2} className="mb-3">Pedido enviado!</Heading>
-          <Text muted>
-            Você vai receber o livro pronto direto no seu WhatsApp 🤝
+          <Heading level={2} className="mb-3">Tô desenhando</Heading>
+          <Text muted className="mb-10">
+            Tô transformando suas fotos em desenhos. Pode levar 1–2 minutinhos.
           </Text>
+          <Card>
+            <div className="h-3 bg-swan rounded-pill overflow-hidden mb-3">
+              <div className="h-full bg-owl transition-all duration-700 rounded-pill" style={{ width: `${pct}%` }} />
+            </div>
+            <Text size="caption" bold muted>
+              {ok}/{data.fotos.length} prontas {erro > 0 && `· ${erro} com erro`}
+            </Text>
+          </Card>
         </div>
       </main>
     );
