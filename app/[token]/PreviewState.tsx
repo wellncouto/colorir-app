@@ -20,9 +20,15 @@ type Data = {
   whatsapp_url: string;
 };
 
-const Page = ({ src }: { src: string }) => (
+const Page = ({ src, eager }: { src: string; eager: boolean }) => (
   <div className="w-full h-full bg-snow flex items-center justify-center overflow-hidden">
-    <img src={src} alt="" className="max-w-full max-h-full object-contain block" />
+    <img
+      src={src}
+      alt=""
+      loading={eager ? "eager" : "lazy"}
+      decoding="async"
+      className="max-w-full max-h-full object-contain block"
+    />
   </div>
 );
 
@@ -79,9 +85,9 @@ export default function PreviewState({
               showPageCorners
               disableFlipByClick={false}
             >
-              {okFotos.map((f) => (
+              {okFotos.map((f, idx) => (
                 <div key={f.posicao} style={{ width: W, height: H }}>
-                  <Page src={`${API}/colorir/album/${token}/pagina/${f.posicao}`} />
+                  <Page src={`${API}/colorir/album/${token}/pagina/${f.posicao}`} eager={idx < 2} />
                 </div>
               ))}
             </HTMLFlipBook>
